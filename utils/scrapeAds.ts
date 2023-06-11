@@ -1,16 +1,12 @@
 import puppeteer from "puppeteer";
-
-type Ad = {
-  title: string;
-  imageUrl: string;
-};
+import { Ad } from "./types";
 
 async function scrapeAds() {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
   const baseUrl = "https://www.sreality.cz/en/search/for-sale/apartments";
-  const desiredAdsCount = 5;
+  const desiredAdsCount = 500;
   let allAds: Ad[] = [];
   let currentPage = 1;
 

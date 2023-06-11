@@ -1,15 +1,20 @@
 import { Client } from "pg";
 import express from "express";
+import dotenv from "dotenv";
+import path from "path";
 import createTable from "./utils/createTable";
 import scrapeAds from "./utils/scrapeAds";
+
+dotenv.config();
 const app = express();
+const port = process.env.PORT;
 
 export const client = new Client({
-  user: "postgres",
-  host: "localhost",
-  database: "sreality",
-  password: "password",
-  port: 5432,
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: Number(process.env.DB_PORT) ?? 5432,
 });
 
 client
@@ -21,25 +26,32 @@ client
     console.error("Error connecting to the database:", error);
   });
 
+app.use(express.static(path.join(__dirname, "..", "build")));
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "build", "index.html"));
+});
+
 app.get("/ads", async (req, res) => {
   try {
     await createTable();
-    const ads = await scrapeAds();
-    await Promise.all(
-      ads.map((ad) => {
-        client.query("INSERT INTO ads (title, image_url) VALUES ($1, $2)", [ad.title, ad.imageUrl])
-      })
-    )
-    res.status(200).json({ message: "Ads saved to the database", ads });
-  } catch (error) {
-    console.error("Error scraping ads:", error);
-    res.status(500).json({ error: "Failed to scrape ads" });
-  }
-});
 
-app.get("/", async (req, res) => {
-  try {
-    const { page = 1, limit = 10 } = req.query;
+    const countRowResult = await client.query("SELECT COUNT(*) FROM ads");
+    const rowCount = parseInt(countRowResult.rows[0].count, 10);
+
+    if (rowCount < 500) {
+      const scrapedAds = await scrapeAds();
+      await Promise.all(
+        scrapedAds.map((ad) => {
+          client.query("INSERT INTO ads (title, image_url) VALUES ($1, $2)", [
+            ad.title,
+            ad.imageUrl,
+          ]);
+        })
+      );
+    }
+
+    const { page = 1, limit = 8 } = req.query;
     const offset = (Number(page) - 1) * Number(limit);
 
     const countResult = await client.query("SELECT COUNT(*) FROM ads");
@@ -60,6 +72,6 @@ app.get("/", async (req, res) => {
   }
 });
 
-app.listen(8080, () => {
-  console.log("Server listening on port 8080");
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
 });
