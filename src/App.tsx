@@ -44,8 +44,8 @@ const App = () => {
     <div className="container">
       <h1>Apartments for sale</h1>
       {loading && <h2>Loading...</h2>}
-      {error && <h2>{error}</h2>}
-      {ads.length > 0 && (
+      {error && <h3>{error}</h3>}
+      {ads && (
         <AdList>
           {ads.map((ad) => (
             <Ad {...ad} key={ad.id} />

@@ -22,7 +22,7 @@ body {
   gap: 20px;
 }
 
-h1 {
+h1, h3 {
   text-align: center;
 }
 
@@ -58,7 +58,7 @@ h1 {
   gap: 10px;
 }
 
-.pagination ul {
+ul.pagination {
   padding: 0;
 }
 

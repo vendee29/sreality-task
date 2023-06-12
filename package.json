@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "npx tsc",
+    "build": "concurrently \"npx tsc\" \"npm run build-fe\"",
     "build-fe": "react-scripts build",
     "start-fe": "react-scripts start",
     "start": "node dist/server.js",
@@ -54,3 +54,4 @@
     ]
   }
 }
+

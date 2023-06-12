@@ -35,10 +35,8 @@ app.get("/", (req, res) => {
 app.get("/ads", async (req, res) => {
   try {
     await createTable();
-
     const countRowResult = await client.query("SELECT COUNT(*) FROM ads");
     const rowCount = parseInt(countRowResult.rows[0].count, 10);
-
     if (rowCount < 500) {
       const scrapedAds = await scrapeAds();
       await Promise.all(
